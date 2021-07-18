@@ -47,6 +47,8 @@ const auth =  require("./authenticate.js");
 const distance = require("./distanceCalc");
 const titleDiff = require("./searchLogic");
 
+const port = process.env.PORT || 3000;
+
 
 
 // Server and database initialization
@@ -1394,7 +1396,7 @@ app.get("/myapplied", [auth.isAuth], (req,res) => {
 
 
 
-app.listen(3001, () => {
+app.listen(port, () => {
     console.log("Server running on port 3001");
     
 })
