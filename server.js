@@ -230,7 +230,10 @@ function filterOutPending(job,user){
 
 // ROUTING
 
+
+
 app.get("/", (req,res) => {
+    //obrisi ovo
     User.find((err, users) => {
         res.send(users);
     })
@@ -429,7 +432,7 @@ app.post("/newJob", upload.single("productImage") ,(req,res) => {
         const data = response.data.data;
         
 
-        if(data.length === 1){
+        if(data.length > 0){
             
             const x = data[0].latitude;
             const y = data[0].longitude;
