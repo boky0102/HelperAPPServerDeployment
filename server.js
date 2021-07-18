@@ -65,7 +65,7 @@ app.use(cookieParser());
 app.use("/public/jobPictures",express.static(__dirname + "/public/jobPictures"));
 
 
-mongoose.connect('mongodb://localhost/messUsersDB', {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect('mongodb+srv://'+ process.env.MONGODB_USER + ':' + process.env.MONGODB_PASSWORD +'@helperapp.xnuvx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority', {useNewUrlParser: true, useUnifiedTopology: true});
 
 
 const userSchema = new mongoose.Schema({
@@ -255,19 +255,14 @@ app.post("/register", (req,res) =>{
     const reqPassword = req.body.password;
 
 
-    console.log(req.body);
-
-
-    
-
     bcrypt.hash(reqPassword, 10 , (err, hash) => {
         User.findOne({userName: reqUsername}, (err, user) => {
             if(err){
                 res.send(err);
-                console.log("Tu zapelo");
+                
             } else if(user){
                 res.send("User exists");
-                console.log("Zapelo 2");
+                
             } else if(!user){
                 const hashedPassword = hash;
                 
@@ -296,11 +291,10 @@ app.post("/register", (req,res) =>{
             
 
                     if(data.length >= 1){
-                        console.log("DOBAR")
+                        
                         const x = data[0].latitude;
                         const y = data[0].longitude;
 
-                        console.log(hash);
 
                         newUser.coordinates.x = x;
                         newUser.coordinates.y = y;
@@ -325,7 +319,7 @@ app.post("/register", (req,res) =>{
                         
                         }
                         else{
-                            console.log("NEDOBAR")
+                            
                             res.status(400).send();
                         }
 
@@ -434,7 +428,7 @@ app.post("/newJob", upload.single("productImage") ,(req,res) => {
         
 
         if(data.length === 1){
-            console.log("DOBAR")
+            
             const x = data[0].latitude;
             const y = data[0].longitude;
             newJob.coordinates.x = x;
@@ -443,23 +437,19 @@ app.post("/newJob", upload.single("productImage") ,(req,res) => {
             res.status(200).send();
 
         }else{
-            console.log("NEDOBAR")
+            
             res.status(400).send();
         }
         
 
     })
-    .catch(err => console.log("ERROR TU ALO",err));
+    .catch(err => console.log("ERROR",err));
     
     
 })
 
 app.get("/find/:title&:category&:distance&:username",(req,res) => {
 
-    console.log(req.params.title);
-    console.log(req.params.category);
-    console.log(req.params.distance);
-    console.log(req.params.username);
 
     const jobsArray = [];
 
@@ -530,7 +520,7 @@ app.get("/find/:title&:category&:distance&:username",(req,res) => {
                             
                         
                         }else{
-                            console.log("Didnt find user");
+                            
                         }
                         
                     })
@@ -555,8 +545,6 @@ app.get("/find/:title&:category&:distance&:username",(req,res) => {
                             if(user){
     
                                 var filteredJobs = [];
-
-                                console.log(user.userName, req.params.username);
     
                                 if(user.userName === req.params.username){
                                     const dist = parseInt(req.params.distance);
@@ -588,7 +576,7 @@ app.get("/find/:title&:category&:distance&:username",(req,res) => {
     
     
                             }else{
-                                console.log("Didnt find user");
+                                
                             }
                             
                         })
@@ -607,11 +595,11 @@ app.get("/find/:title&:category&:distance&:username",(req,res) => {
                     console.log("Err");
                 }
                 else{
-                    console.log("TU SAM USO")
+                    
                     
                     const filteredJobs = [];
                     jobs.forEach((job) => {
-                        console.log(job.username, " ", req.params.username);
+                        
                         if (job.username != req.params.username && job.scheduled !== true){
                             if(filterOutPending(job, req.params.username) === false){
                                 filteredJobs.push(job);
@@ -645,7 +633,7 @@ app.get("/find/:title&:category&:distance&:username",(req,res) => {
 
                                     const filteredJobs = [];
                                     jobs.forEach((job) => {
-                                        console.log(job.username, " ", req.params.username);
+                                        
                                         if (job.username !== req.params.username && job.scheduled !== true && job.completed !== true){
                                             if(filterOutPending(job, req.params.username) === false){
                                                 filteredJobs.push(job);
@@ -765,7 +753,7 @@ app.get("/find/:title&:category&:distance&:username",(req,res) => {
                                 
                                 })
                                 filterJobsByTitle(filteredJobs, req.params.title).then((response) => {
-                                    console.log(response);
+                                    
                                     res.send(response);
                                     
                                 })
@@ -883,7 +871,7 @@ app.get("/job/:id", (req,res) => {
                 }
 
                 else{
-                    console.log("Nema takvog usera");
+                    
                 }
                 
             })
@@ -896,7 +884,7 @@ app.post("/message", [auth.isAuth] , (req,res) => {
     const username = req.jwt.userName;
     const message = req.body.message;
     const reciever = req.body.reciever;
-    console.log(username, "-", reciever, ":", message);
+    
 
     Message.findOne().or([{user1: username, user2: reciever},{user2: username, user1: reciever}])
     .then((mess) => {
@@ -990,7 +978,6 @@ app.post("/conversation/message", [auth.isAuth], (req,res) => {
     const id = req.body.id;
     const sentMessage = req.body.message;
 
-    console.log("Message recieved :", sentMessage);
 
     Message.findOne({_id: id}, (err, conversation) => {
         if(err){
@@ -999,7 +986,6 @@ app.post("/conversation/message", [auth.isAuth], (req,res) => {
         else if(conversation){
             conversation.messages.push({sender: username, message: sentMessage, date: Date.now()});
             conversation.save();
-            console.log("Message saved");
             res.status(200).send();
         }
         else{
@@ -1171,7 +1157,6 @@ app.post("/job/apply", [auth.isAuth], (req,res) => {
 
 app.get("/myjobs", [auth.isAuth], (req,res) => {
     const username = req.jwt.userName;
-    console.log(username);
     Job.find({username: username}, (err, jobs) => {
         if(err){
             console.log(err);
@@ -1217,7 +1202,6 @@ app.get("/myScheduledJobs", [auth.isAuth], (req,res) => {
 })
 
 app.post("/jobs/accepted", [auth.isAuth], (req,res) => {
-    console.log(req.body);
     const worker = req.body.user;
     const jobId = req.body.jobId;
 
@@ -1248,7 +1232,6 @@ app.post("/jobfinished", [auth.isAuth], (req,res) => {
         rating: req.body.rating
     }
 
-    console.log("Job ID:",req.body.jobId);
 
     User.findOne({userName: reviewAbout}, (err, user) => {
         if(err){
@@ -1353,7 +1336,6 @@ app.get("/profileInfo/:id", [auth.isAuth], (req,res) => {
 app.get("/appliedScheduled", [auth.isAuth], (req,res) => {
     
     const worker = req.jwt.userName;
-    console.log("worker", worker);
     Job.find({worker: worker}, (err, jobs) => {
         if(err){
             console.log(err)
