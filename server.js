@@ -13,6 +13,8 @@ const axios = require('axios');
 
 const multer = require('multer');
 
+//API URL https://helper-app-server-deployment-wvj4p.ondigitalocean.app/
+
 const storage = multer.diskStorage({
     destination: function(req, file, cb) {
         cb(null, "./public/jobPictures/");
@@ -1099,7 +1101,7 @@ app.get("/avatar/:username", (req,res) => {
         else{
             if(user){
                 if(user.avatar !== ""){
-                    res.send("http://localhost:3001/"+user.avatar)
+                    res.send("https://helper-app-server-deployment-wvj4p.ondigitalocean.app/"+user.avatar)
                 }
                 else{
                     res.status(404).send();
